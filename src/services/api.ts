@@ -1,4 +1,7 @@
-const BASE_URL = 'http://localhost:5131/api'
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const BASE_URL = isLocal
+    ? 'http://localhost:5131/api'
+    : 'https://budgetpro-api.onrender.com/api'
 
 export async function apiRequest<T>(
     endpoint: string,
