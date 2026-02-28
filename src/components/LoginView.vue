@@ -58,7 +58,7 @@ async function handleLogin() {
   // Simulate small delay for UX
   await new Promise(r => setTimeout(r, 600))
 
-  const result = auth.login(loginForm.value.email, loginForm.value.password)
+  const result = await auth.login(loginForm.value.email, loginForm.value.password)
   isLoading.value = false
 
   if (!result.success) {
@@ -82,7 +82,7 @@ async function handleRegister() {
   isLoading.value = true
   await new Promise(r => setTimeout(r, 600))
 
-  const result = auth.register(
+  const result = await auth.register(
     registerForm.value.name,
     registerForm.value.email,
     registerForm.value.password,

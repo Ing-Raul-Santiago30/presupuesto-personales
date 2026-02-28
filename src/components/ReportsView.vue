@@ -20,6 +20,13 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 const store = useBudgetStore()
 const activeChart = ref<'distribution' | 'daily' | 'income-expense' | 'trend'>('distribution')
 
+// Detect theme from DOM
+const isDark = computed(() => document.documentElement.getAttribute('data-theme') !== 'light')
+const chartTextColor = computed(() => isDark.value ? '#9ca3af' : '#64748b')
+const chartGridColor = computed(() => isDark.value ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)')
+const chartTooltipBg = computed(() => isDark.value ? '#1e1e3c' : '#ffffff')
+const chartTooltipText = computed(() => isDark.value ? '#f0f0ff' : '#1e293b')
+
 // Doughnut Chart - Expense Distribution
 const doughnutData = computed(() => {
   const cats = store.budgets.value.filter(b => b.type === 'expense')
@@ -48,14 +55,14 @@ const doughnutData = computed(() => {
   }
 })
 
-const doughnutOptions = {
+const doughnutOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
       position: 'right' as const,
       labels: {
-        color: '#9ca3af',
+        color: chartTextColor.value,
         font: { family: 'Inter', size: 12 },
         padding: 16,
         usePointStyle: true,
@@ -63,10 +70,10 @@ const doughnutOptions = {
       },
     },
     tooltip: {
-      backgroundColor: '#1e1e3c',
-      titleColor: '#f0f0ff',
-      bodyColor: '#9ca3af',
-      borderColor: 'rgba(255,255,255,0.1)',
+      backgroundColor: chartTooltipBg.value,
+      titleColor: chartTooltipText.value,
+      bodyColor: chartTextColor.value,
+      borderColor: isDark.value ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
       borderWidth: 1,
       padding: 12,
       cornerRadius: 8,
@@ -75,7 +82,7 @@ const doughnutOptions = {
     },
   },
   cutout: '65%',
-}
+}))
 
 // Bar Chart - Daily Expenses
 const barData = computed(() => {
@@ -103,16 +110,16 @@ const barData = computed(() => {
   }
 })
 
-const barOptions = {
+const barOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: '#1e1e3c',
-      titleColor: '#f0f0ff',
-      bodyColor: '#9ca3af',
-      borderColor: 'rgba(255,255,255,0.1)',
+      backgroundColor: chartTooltipBg.value,
+      titleColor: chartTooltipText.value,
+      bodyColor: chartTextColor.value,
+      borderColor: isDark.value ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
       borderWidth: 1,
       padding: 12,
       cornerRadius: 8,
@@ -122,15 +129,15 @@ const barOptions = {
   },
   scales: {
     x: {
-      grid: { color: 'rgba(255,255,255,0.04)' },
-      ticks: { color: '#6b7280', font: { family: 'Inter', size: 10 } },
+      grid: { color: chartGridColor.value },
+      ticks: { color: chartTextColor.value, font: { family: 'Inter', size: 10 } },
     },
     y: {
-      grid: { color: 'rgba(255,255,255,0.04)' },
-      ticks: { color: '#6b7280', font: { family: 'Inter', size: 10 } },
+      grid: { color: chartGridColor.value },
+      ticks: { color: chartTextColor.value, font: { family: 'Inter', size: 10 } },
     },
   },
-}
+}))
 
 // Income vs Expenses
 const incomeExpenseData = computed(() => {
@@ -176,17 +183,17 @@ const incomeExpenseData = computed(() => {
   }
 })
 
-const incomeExpenseOptions = {
+const incomeExpenseOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   indexAxis: 'y' as const,
   plugins: {
     legend: { display: false },
     tooltip: {
-      backgroundColor: '#1e1e3c',
-      titleColor: '#f0f0ff',
-      bodyColor: '#9ca3af',
-      borderColor: 'rgba(255,255,255,0.1)',
+      backgroundColor: chartTooltipBg.value,
+      titleColor: chartTooltipText.value,
+      bodyColor: chartTextColor.value,
+      borderColor: isDark.value ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
       borderWidth: 1,
       padding: 12,
       cornerRadius: 8,
@@ -200,15 +207,15 @@ const incomeExpenseOptions = {
   },
   scales: {
     x: {
-      grid: { color: 'rgba(255,255,255,0.04)' },
-      ticks: { color: '#6b7280', font: { family: 'Inter', size: 10 } },
+      grid: { color: chartGridColor.value },
+      ticks: { color: chartTextColor.value, font: { family: 'Inter', size: 10 } },
     },
     y: {
       grid: { display: false },
-      ticks: { color: '#9ca3af', font: { family: 'Inter', size: 11 } },
+      ticks: { color: chartTextColor.value, font: { family: 'Inter', size: 11 } },
     },
   },
-}
+}))
 
 // Cumulative spending line
 const cumulativeData = computed(() => {
@@ -264,7 +271,7 @@ const cumulativeData = computed(() => {
   }
 })
 
-const lineOptions = {
+const lineOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: {
@@ -274,16 +281,16 @@ const lineOptions = {
   plugins: {
     legend: {
       labels: {
-        color: '#9ca3af',
+        color: chartTextColor.value,
         font: { family: 'Inter', size: 12 },
         usePointStyle: true,
       },
     },
     tooltip: {
-      backgroundColor: '#1e1e3c',
-      titleColor: '#f0f0ff',
-      bodyColor: '#9ca3af',
-      borderColor: 'rgba(255,255,255,0.1)',
+      backgroundColor: chartTooltipBg.value,
+      titleColor: chartTooltipText.value,
+      bodyColor: chartTextColor.value,
+      borderColor: isDark.value ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
       borderWidth: 1,
       padding: 12,
       cornerRadius: 8,
@@ -291,15 +298,15 @@ const lineOptions = {
   },
   scales: {
     x: {
-      grid: { color: 'rgba(255,255,255,0.04)' },
-      ticks: { color: '#6b7280', font: { family: 'Inter', size: 10 } },
+      grid: { color: chartGridColor.value },
+      ticks: { color: chartTextColor.value, font: { family: 'Inter', size: 10 } },
     },
     y: {
-      grid: { color: 'rgba(255,255,255,0.04)' },
-      ticks: { color: '#6b7280', font: { family: 'Inter', size: 10 } },
+      grid: { color: chartGridColor.value },
+      ticks: { color: chartTextColor.value, font: { family: 'Inter', size: 10 } },
     },
   },
-}
+}))
 
 // Stats summary
 const avgDailyExpense = computed(() => {

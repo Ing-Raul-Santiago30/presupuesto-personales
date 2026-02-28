@@ -1,5 +1,5 @@
 export interface Transaction {
-  id: string
+  id: string | number
   type: 'income' | 'expense'
   amount: number
   category: string
@@ -9,7 +9,7 @@ export interface Transaction {
 }
 
 export interface BudgetCategory {
-  id: string
+  id: string | number
   name: string
   icon: string
   color: string

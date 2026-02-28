@@ -50,7 +50,15 @@ const filteredTransactions = computed(() => {
 })
 
 const availableCategories = computed(() => {
-  return store.budgets.value.filter(b => b.type === form.value.type)
+  const budgetCats = store.budgets.value
+    .filter(b => b.type === form.value.type)
+    .map(b => ({ id: b.id, name: b.name, icon: b.icon }))
+
+  const suggestedCats = (store.availableCategories.value || [])
+    .filter(name => !budgetCats.some(b => b.name === name))
+    .map((name, index) => ({ id: `suggested-${index}`, name, icon: '🏷️' }))
+
+  return [...budgetCats, ...suggestedCats]
 })
 
 const totalFiltered = computed(() => {

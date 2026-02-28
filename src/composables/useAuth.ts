@@ -1,31 +1,23 @@
 import { ref, computed } from 'vue'
+import { apiRequest } from '../services/api'
 
-const USERS_KEY = 'budgetpro_users'
 const SESSION_KEY = 'budgetpro_session'
+const TOKEN_KEY = 'budgetpro_token'
 
 export interface User {
-    id: string
+    id: number
     name: string
     email: string
-    password: string
     avatar: string
+    currency: string
     createdAt: string
 }
 
-function generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2)
-}
-
-function loadUsers(): User[] {
-    try {
-        const raw = localStorage.getItem(USERS_KEY)
-        if (raw) return JSON.parse(raw)
-    } catch { /* ignore */ }
-    return []
-}
-
-function saveUsers(users: User[]) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users))
+interface AuthResponse {
+    success: boolean
+    error?: string
+    token?: string
+    user?: User
 }
 
 function loadSession(): User | null {
@@ -36,11 +28,13 @@ function loadSession(): User | null {
     return null
 }
 
-function saveSession(user: User | null) {
-    if (user) {
+function saveSession(user: User | null, token?: string) {
+    if (user && token) {
         localStorage.setItem(SESSION_KEY, JSON.stringify(user))
+        localStorage.setItem(TOKEN_KEY, token)
     } else {
         localStorage.removeItem(SESSION_KEY)
+        localStorage.removeItem(TOKEN_KEY)
     }
 }
 
@@ -52,53 +46,40 @@ const isAuthenticated = computed(() => currentUser.value !== null)
 const avatarOptions = ['🧑‍💼', '👩‍💼', '🧑‍💻', '👩‍💻', '🧑‍🎨', '👩‍🎨', '🦸', '🦸‍♀️', '🧙', '🧙‍♀️', '🐱', '🐶']
 
 export function useAuth() {
-    function register(name: string, email: string, password: string, avatar: string): { success: boolean; error?: string } {
-        const users = loadUsers()
+    async function register(name: string, email: string, password: string, avatar: string): Promise<{ success: boolean; error?: string }> {
+        try {
+            const result = await apiRequest<AuthResponse>('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ name, email, password, avatar })
+            })
 
-        // Check if email already exists
-        if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
-            return { success: false, error: 'Este correo ya está registrado' }
+            if (result.success && result.user && result.token) {
+                currentUser.value = result.user
+                saveSession(result.user, result.token)
+                return { success: true }
+            }
+            return { success: false, error: result.error || 'Error desconocido' }
+        } catch (err: any) {
+            return { success: false, error: err.message }
         }
-
-        // Validate
-        if (!name.trim()) return { success: false, error: 'El nombre es requerido' }
-        if (!email.trim()) return { success: false, error: 'El correo es requerido' }
-        if (password.length < 4) return { success: false, error: 'La contraseña debe tener al menos 4 caracteres' }
-
-        const newUser: User = {
-            id: generateId(),
-            name: name.trim(),
-            email: email.toLowerCase().trim(),
-            password,
-            avatar: avatar || '🧑‍💼',
-            createdAt: new Date().toISOString(),
-        }
-
-        users.push(newUser)
-        saveUsers(users)
-        currentUser.value = newUser
-        saveSession(newUser)
-
-        return { success: true }
     }
 
-    function login(email: string, password: string): { success: boolean; error?: string } {
-        const users = loadUsers()
+    async function login(email: string, password: string): Promise<{ success: boolean; error?: string }> {
+        try {
+            const result = await apiRequest<AuthResponse>('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            })
 
-        if (!email.trim()) return { success: false, error: 'El correo es requerido' }
-        if (!password) return { success: false, error: 'La contraseña es requerida' }
-
-        const user = users.find(
-            u => u.email.toLowerCase() === email.toLowerCase().trim() && u.password === password
-        )
-
-        if (!user) {
-            return { success: false, error: 'Correo o contraseña incorrectos' }
+            if (result.success && result.user && result.token) {
+                currentUser.value = result.user
+                saveSession(result.user, result.token)
+                return { success: true }
+            }
+            return { success: false, error: result.error || 'Error desconocido' }
+        } catch (err: any) {
+            return { success: false, error: err.message }
         }
-
-        currentUser.value = user
-        saveSession(user)
-        return { success: true }
     }
 
     function logout() {

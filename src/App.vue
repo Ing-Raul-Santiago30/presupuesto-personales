@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import type { ViewMode } from './types'
 import { useBudgetStore } from './composables/useBudgetStore'
 import { useAuth } from './composables/useAuth'
@@ -14,6 +14,20 @@ const store = useBudgetStore()
 const auth = useAuth()
 const currentView = ref<ViewMode>('dashboard')
 const showUserMenu = ref(false)
+const isDark = ref(localStorage.getItem('budgetpro_theme') !== 'light')
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+  localStorage.setItem('budgetpro_theme', isDark.value ? 'dark' : 'light')
+}
+
+watch(isDark, (val) => {
+  document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light')
+}, { immediate: true })
+
+onMounted(() => {
+  document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
+})
 
 function navigate(view: ViewMode) {
   currentView.value = view
@@ -77,6 +91,11 @@ function handleLogout() {
                 <p class="dropdown-email">{{ auth.currentUser.value?.email }}</p>
               </div>
             </div>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item" @click="toggleTheme" id="theme-toggle-btn">
+              <span>{{ isDark ? '☀️' : '🌙' }}</span>
+              <span>Modo {{ isDark ? 'Claro' : 'Oscuro' }}</span>
+            </button>
             <div class="dropdown-divider"></div>
             <button class="dropdown-item logout-item" @click="handleLogout" id="logout-btn">
               <span>🚪</span>
