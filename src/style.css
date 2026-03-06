@@ -4,7 +4,7 @@
 
 :root {
   /* Color System */
-  --bg-primary: #0f0f1a;
+  --bg-primary: #1a120f;
   --bg-secondary: #161628;
   --bg-card: rgba(30, 30, 60, 0.6);
   --bg-card-hover: rgba(40, 40, 80, 0.7);
